@@ -292,11 +292,18 @@ namespace mars
             return true;
         }
 
-        void vectorToConfigItem(ConfigItem *item, Vector *v)
+        void vectorToConfigItem(ConfigItem *item, const Vector *v)
         {
             (*item)["x"] = v->x();
             (*item)["y"] = v->y();
             (*item)["z"] = v->z();
+        }
+
+        ConfigItem vectorToConfigItem(const Vector& v)
+        {
+            ConfigItem result;
+            vectorToConfigItem(&result, &v);
+            return result;
         }
 
         bool quaternionFromConfigItem(ConfigItem *item, Quaternion *q)
@@ -308,12 +315,32 @@ namespace mars
             return true;
         }
 
-        void quaternionToConfigItem(ConfigItem *item, Quaternion *q)
+        void quaternionToConfigItem(ConfigItem *item, const Quaternion *q, bool add_euler_angles)
         {
-            (*item)["w"] = q->w();
-            (*item)["x"] = q->x();
-            (*item)["y"] = q->y();
-            (*item)["z"] = q->z();
+            if (add_euler_angles)
+            {
+                (*item)["quaternion"] = quaternionToConfigItem(*q);
+                const sRotation eulerAngles{quaternionTosRotation(*q)};
+                ConfigItem eulerConfigItem;
+                eulerConfigItem["alpha"] = eulerAngles.alpha;
+                eulerConfigItem["beta"] = eulerAngles.beta;
+                eulerConfigItem["gamma"] = eulerAngles.gamma;
+                (*item)["euler"] = eulerConfigItem;
+            }
+            else
+            {
+                (*item)["w"] = q->w();
+                (*item)["x"] = q->x();
+                (*item)["y"] = q->y();
+                (*item)["z"] = q->z();
+            }
+        }
+
+        ConfigItem quaternionToConfigItem(const Quaternion& q, bool add_euler_angles)
+        {
+            ConfigItem result;
+            quaternionToConfigItem(&result, &q, add_euler_angles);
+            return result;
         }
 
         void inertiaTensorToConfigItem(ConfigItem *item, double *inertia)

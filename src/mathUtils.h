@@ -101,10 +101,12 @@ namespace mars
         Vector vectorFromSpherical(double r, double theta, double phi);
 
         bool vectorFromConfigItem(ConfigItem *item, Vector *v);
-        void vectorToConfigItem(ConfigItem *item, Vector *v);
+        void vectorToConfigItem(ConfigItem *item, const Vector *v);
+        ConfigItem vectorToConfigItem(const Vector& v);
 
         bool quaternionFromConfigItem(ConfigItem *item, Quaternion *q);
-        void quaternionToConfigItem(ConfigItem *item, Quaternion *q);
+        void quaternionToConfigItem(ConfigItem *item, const Quaternion *q, bool add_euler_angles = false);
+        ConfigItem quaternionToConfigItem(const Quaternion& q, bool add_euler_angles = false);
 
         template <typename T>
         Quaternion quaternionFromMembers(T q)
