@@ -113,7 +113,8 @@ namespace mars
          * Examples:
          *   - matchPattern("foo", "foo") -> true
          *   - matchPattern("foo", "fo") -> false
-         *   - matchPattern("fo", "foo") -> true [!]
+         *   - matchPattern("fo", "foo") -> false
+         *   - matchPattern("*fo", "foo") -> true [!]
          *   - matchPattern("foo*", "foo") -> true
          *   - matchPattern("foo*", "foobar") -> true
          *   - matchPattern("foo*", "what is foo") -> false
