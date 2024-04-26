@@ -1,26 +1,26 @@
-#include "Socket.h"
+#include "Socket.hpp"
 
 #ifdef WIN32
-#  include <winsock2.h>
+#include <winsock2.h>
 #else
-#  include <netinet/in.h>
-#  include <netinet/tcp.h>
-#  include <netdb.h>
-#  include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <netdb.h>
+#include <sys/socket.h>
 #endif
 
 #ifndef __linux
-#  define MSG_NOSIGNAL 0
+#define MSG_NOSIGNAL 0
 #endif
 
 #ifdef WIN32
-#  ifndef WSAEAGAIN
-#    define WSAEAGAIN WSAEWOULDBLOCK
-#  endif
-#  define CHECK_ERRNO(expected)                 \
-    (WSAGetLastError() == WSA ## expected)
+#ifndef WSAEAGAIN
+#define WSAEAGAIN WSAEWOULDBLOCK
+#endif
+#define CHECK_ERRNO(expected) \
+    (WSAGetLastError() == WSA##expected)
 #else
-#  define CHECK_ERRNO(expected)                 \
+#define CHECK_ERRNO(expected) \
     (errno == expected)
 #endif
 
@@ -28,35 +28,42 @@
 #include <cstdio>
 #include <errno.h>
 
-#include "misc.h"
+#include "misc.hpp"
 
 namespace mars
 {
     namespace utils
     {
 
-
         /********************************
          * helper function implementation
          ********************************/
         unsigned short ntoh(const unsigned short &val)
-        { return ntohs(val); }
+        {
+            return ntohs(val);
+        }
         unsigned long ntoh(const unsigned long &val)
-        { return ntohl(val); }
+        {
+            return ntohl(val);
+        }
         unsigned short hton(const unsigned short &val)
-        { return htons(val); }
+        {
+            return htons(val);
+        }
         unsigned long hton(const unsigned long &val)
-        { return htonl(val); }
+        {
+            return htonl(val);
+        }
 
         bool isBigEndian()
         {
-            union {
+            union
+            {
                 uint32_t i;
                 char c[4];
             } test = {0x01020304};
             return test.c[0] == 1;
         }
-
 
         /********************************
          * TCPBaseSocket declaration
@@ -72,8 +79,8 @@ namespace mars
             SocketError bind(const std::string &addr, unsigned short port);
             SocketError listen(int queueSize);
             SocketError connect(const std::string &host, unsigned short port);
-            TCPBaseSocket* accept();
-            TCPBaseSocket* connect();
+            TCPBaseSocket *accept();
+            TCPBaseSocket *connect();
             size_t send(const char *data, size_t len) const;
             size_t recv(char *data, size_t maxLen);
             void setFlags(unsigned int flags);
@@ -92,8 +99,6 @@ namespace mars
             int internal_select(bool writing, double timeout);
         }; // end of class TCPBaseSocket
 
-
-
         /********************************
          * TCPServer implementation
          ********************************/
@@ -106,7 +111,7 @@ namespace mars
 
         TCPServer::~TCPServer()
         {
-            if(s)
+            if (s)
             {
                 s->close();
                 delete s;
@@ -116,9 +121,9 @@ namespace mars
         SocketError TCPServer::open(unsigned short port)
         {
             SocketError ret;
-            if((ret = s->init()) == SOCKET_SUCCESS)
+            if ((ret = s->init()) == SOCKET_SUCCESS)
             {
-                if((ret = s->bind("localhost", port)) == SOCKET_SUCCESS)
+                if ((ret = s->bind("localhost", port)) == SOCKET_SUCCESS)
                 {
                     ret = s->listen(3);
                 }
@@ -127,13 +132,15 @@ namespace mars
         }
 
         SocketError TCPServer::hasClient() const
-        {assert(false);}
+        {
+            assert(false);
+        }
 
         SocketError TCPServer::acceptConnection(TCPConnection *c) const
         {
-            if(c->s)
+            if (c->s)
             {
-                if(c->s->isConnected())
+                if (c->s->isConnected())
                 {
                     fprintf(stderr,
                             "TCPServer::acceptConnection: client already connected\n");
@@ -146,29 +153,43 @@ namespace mars
         }
 
         void TCPServer::close()
-        { if(s) s->close(); }
+        {
+            if (s)
+                s->close();
+        }
 
         bool TCPServer::isOpen()
-        { return (s && s->isConnected()); }
+        {
+            return (s && s->isConnected());
+        }
 
         SocketError TCPServer::reopen()
-        {assert(false);}
+        {
+            assert(false);
+        }
 
         void TCPServer::setTimeout(double timeout)
-        { if(s) s->setTimeout(timeout); }
+        {
+            if (s)
+                s->setTimeout(timeout);
+        }
 
         double TCPServer::getTimeout() const
-        { return (s ? s->getTimeout() : 0.); }
+        {
+            return (s ? s->getTimeout() : 0.);
+        }
 
         /* disallow copying */
         TCPServer::TCPServer(const TCPServer &other)
-        {assert(false);}
+        {
+            assert(false);
+        }
 
         /* disallow assignment */
-        TCPServer& TCPServer::operator=(const TCPServer &other)
-        {assert(false);}
-
-
+        TCPServer &TCPServer::operator=(const TCPServer &other)
+        {
+            assert(false);
+        }
 
         /********************************
          * TCPConnection implementation
@@ -181,7 +202,8 @@ namespace mars
 
         TCPConnection::~TCPConnection()
         {
-            if(s) {
+            if (s)
+            {
                 s->close();
                 delete s;
             }
@@ -190,13 +212,13 @@ namespace mars
         SocketError TCPConnection::connectToTCPServer(const std::string &host,
                                                       unsigned short port)
         {
-            if(s)
+            if (s)
             {
                 delete s;
             }
             s = new TCPBaseSocket;
             SocketError ret;
-            if((ret = s->init()) == SOCKET_SUCCESS)
+            if ((ret = s->init()) == SOCKET_SUCCESS)
             {
                 ret = s->connect(host, port);
             }
@@ -204,23 +226,30 @@ namespace mars
         }
 
         void TCPConnection::close()
-        { if(s) s->close(); }
+        {
+            if (s)
+                s->close();
+        }
 
         bool TCPConnection::isConnected() const
-        { return s && s->isConnected(); }
+        {
+            return s && s->isConnected();
+        }
 
         SocketError TCPConnection::sendAll(const std::string &data)
-        { return sendAll(data.data(), data.size()); }
+        {
+            return sendAll(data.data(), data.size());
+        }
 
         SocketError TCPConnection::sendAll(const char *data, size_t len)
         {
-            if(!s)
+            if (!s)
                 return SOCKET_INVALID_SOCKET;
             size_t offset = 0;
-            while(len > 0)
+            while (len > 0)
             {
                 size_t bytesSent = send(data + offset, len);
-                if(!bytesSent)
+                if (!bytesSent)
                     return SOCKET_CONNECTION_BROKEN;
                 offset += bytesSent;
                 len -= bytesSent;
@@ -230,7 +259,7 @@ namespace mars
 
         size_t TCPConnection::send(const char *data, size_t len)
         {
-            if(s)
+            if (s)
             {
                 return s->send(data, len);
             }
@@ -239,12 +268,12 @@ namespace mars
 
         SocketError TCPConnection::recvAll(char *data, size_t len)
         {
-            if(!s)
+            if (!s)
                 return SOCKET_INVALID_SOCKET;
-            while(len > 0)
+            while (len > 0)
             {
                 size_t bytesRead = s->recv(data, len);
-                if(!bytesRead)
+                if (!bytesRead)
                     return SOCKET_CONNECTION_BROKEN;
                 data += bytesRead;
                 len -= bytesRead;
@@ -254,22 +283,23 @@ namespace mars
 
         size_t TCPConnection::recv(char *data, size_t max)
         {
-            if(s)
+            if (s)
                 return s->recv(data, max);
             return 0;
         }
 
         SocketError TCPConnection::sendBinary(const void *data, size_t len)
         {
-            if(isBigEndian())
+            if (isBigEndian())
             {
-                return sendAll(static_cast<const char*>(data), len);
-            } else
+                return sendAll(static_cast<const char *>(data), len);
+            }
+            else
             {
                 char *buffer = new char[len];
-                for(size_t i=0, j=len-1; i < len; ++i, --j)
+                for (size_t i = 0, j = len - 1; i < len; ++i, --j)
                 {
-                    buffer[i] = static_cast<const char*>(data)[j];
+                    buffer[i] = static_cast<const char *>(data)[j];
                 }
                 SocketError ret = sendAll(buffer, len);
                 delete[] buffer;
@@ -279,16 +309,17 @@ namespace mars
 
         SocketError TCPConnection::recvBinary(void *data, size_t len)
         {
-            if(isBigEndian())
+            if (isBigEndian())
             {
-                return recvAll(static_cast<char*>(data), len);
-            } else
+                return recvAll(static_cast<char *>(data), len);
+            }
+            else
             {
                 char *buffer = new char[len];
                 SocketError ret = recvAll(buffer, len);
-                for(size_t i=0, j=len-1; i < len; ++i, --j)
+                for (size_t i = 0, j = len - 1; i < len; ++i, --j)
                 {
-                    ((unsigned char*)data)[i] = ((unsigned char*)buffer)[j];
+                    ((unsigned char *)data)[i] = ((unsigned char *)buffer)[j];
                 }
                 delete[] buffer;
                 return ret;
@@ -296,33 +327,43 @@ namespace mars
         }
 
         void TCPConnection::setBlocking(bool blocking)
-        {assert(false);}
+        {
+            assert(false);
+        }
         bool TCPConnection::isBlocking() const
-        { return true; }
+        {
+            return true;
+        }
 
         void TCPConnection::setTimeout(double timeout)
-        { if(s) s->setTimeout(timeout); }
+        {
+            if (s)
+                s->setTimeout(timeout);
+        }
 
         double TCPConnection::getTimeout() const
-        { return (s ? s->getTimeout() : 0.); }
+        {
+            return (s ? s->getTimeout() : 0.);
+        }
 
         /* disallow copying */
         TCPConnection::TCPConnection(const TCPConnection &other)
-        {assert(false);}
+        {
+            assert(false);
+        }
 
         /* disallow assignment */
-        TCPConnection& TCPConnection::operator=(const TCPConnection &other)
-        {assert(false);}
-
-
+        TCPConnection &TCPConnection::operator=(const TCPConnection &other)
+        {
+            assert(false);
+        }
 
         /********************************
          * TCPBaseSocket implementation
          ********************************/
 
         TCPBaseSocket::TCPBaseSocket()
-            : flags(SOCKET_FLAG_REUSEADDR)
-            , sock_fd(INVALID_SOCKET)
+            : flags(SOCKET_FLAG_REUSEADDR), sock_fd(INVALID_SOCKET)
         {
 
             sock_timeout = -1;
@@ -351,7 +392,7 @@ namespace mars
             sock_fd = socket(getSocketFamily(), getSocketType(), getSocketProtocol());
             sock_timeout = defaultTimeout;
             setFlags(flags);
-            if(sock_fd == -1)
+            if (sock_fd == -1)
             {
                 sock_fd = INVALID_SOCKET;
                 return SOCKET_CREATE_FAILED;
@@ -361,7 +402,7 @@ namespace mars
 
         void TCPBaseSocket::close()
         {
-            if(isConnected())
+            if (isConnected())
             {
 #ifdef WIN32
                 closesocket(sock_fd);
@@ -375,13 +416,13 @@ namespace mars
         SocketError TCPBaseSocket::bind(const std::string &host,
                                         unsigned short port)
         {
-            if(sock_fd == INVALID_SOCKET)
+            if (sock_fd == INVALID_SOCKET)
             {
                 fprintf(stderr, "TCPBaseSocket::bind: invalid socket\n");
                 return SOCKET_INVALID_SOCKET;
             }
-            struct hostent *hp = gethostbyname( host.c_str() );
-            if(hp == NULL)
+            struct hostent *hp = gethostbyname(host.c_str());
+            if (hp == NULL)
             {
                 fprintf(stderr, "TCPBaseSocket::bind: gethostbyname failed\n");
                 return SOCKET_HOST_NOT_FOUND;
@@ -392,7 +433,7 @@ namespace mars
             sa.sin_family = hp->h_addrtype;
             sa.sin_port = hton(port);
 
-            if(::bind(sock_fd, (struct sockaddr*)&sa, sizeof(sa)) < 0)
+            if (::bind(sock_fd, (struct sockaddr *)&sa, sizeof(sa)) < 0)
             {
                 close();
                 fprintf(stderr, "TCPBaseSocket::bind: bind failed\n");
@@ -403,7 +444,7 @@ namespace mars
 
         SocketError TCPBaseSocket::listen(int queueSize)
         {
-            if(::listen(sock_fd, queueSize) != 0)
+            if (::listen(sock_fd, queueSize) != 0)
             {
                 fprintf(stderr, "errrror 4\n");
                 return SOCKET_LISTEN_FAILED;
@@ -411,9 +452,9 @@ namespace mars
             return SOCKET_SUCCESS;
         }
 
-        TCPBaseSocket* TCPBaseSocket::accept()
+        TCPBaseSocket *TCPBaseSocket::accept()
         {
-            if(sock_fd == INVALID_SOCKET)
+            if (sock_fd == INVALID_SOCKET)
             {
                 fprintf(stderr, "TCPBaseSocket::accept: invalid socket\n");
                 return NULL;
@@ -421,26 +462,27 @@ namespace mars
             long now = 0, deadline = 0;
             double timeout = sock_timeout;
             bool has_timeout = sock_timeout > 0.;
-            if(has_timeout)
+            if (has_timeout)
             {
                 now = mars::utils::getTime();
                 deadline = now + (long)(sock_timeout * 1000.);
             }
-            while(true)
+            while (true)
             {
                 errno = 0;
                 int selected = internal_select(0, timeout);
-                if(selected == 1)
+                if (selected == 1)
                 {
                     TCPBaseSocket *client = new TCPBaseSocket;
                     client->sock_fd = ::accept(sock_fd, NULL, NULL);
                     return client;
-                } else if(selected == 0)
+                }
+                else if (selected == 0)
                 {
                     fprintf(stderr, "TCPBaseSocket::accept: select failed\n");
                     return NULL;
                 }
-                if(!has_timeout || (!CHECK_ERRNO(EWOULDBLOCK) && !CHECK_ERRNO(EAGAIN)))
+                if (!has_timeout || (!CHECK_ERRNO(EWOULDBLOCK) && !CHECK_ERRNO(EAGAIN)))
                     break;
                 timeout = mars::utils::getTimeDiff(now) - deadline;
                 now = mars::utils::getTime();
@@ -453,7 +495,7 @@ namespace mars
         {
             struct hostent *h;
             h = gethostbyname(host.c_str());
-            if(!h)
+            if (!h)
             {
                 fprintf(stderr, "TCPBaseSocket::connect: Host \"%s\" not found\n",
                         host.c_str());
@@ -461,11 +503,11 @@ namespace mars
             }
             struct sockaddr_in servAddr;
             servAddr.sin_family = h->h_addrtype;
-            memcpy((char*)&servAddr.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
+            memcpy((char *)&servAddr.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
             servAddr.sin_port = hton(port);
-            int result = ::connect(sock_fd, (struct sockaddr*)&servAddr,
+            int result = ::connect(sock_fd, (struct sockaddr *)&servAddr,
                                    sizeof(servAddr));
-            if(result != 0)
+            if (result != 0)
             {
                 close();
                 // fprintf(stderr, "TCPBaseSocket::connect: connect failed to %s:%hu\n",
@@ -487,36 +529,42 @@ namespace mars
         }
 
         int TCPBaseSocket::getSocketFamily() const
-        { return AF_INET; }
+        {
+            return AF_INET;
+        }
 
         int TCPBaseSocket::getSocketType() const
-        { return SOCK_STREAM; }
+        {
+            return SOCK_STREAM;
+        }
 
         int TCPBaseSocket::getSocketProtocol() const
-        { return 0; }
+        {
+            return 0;
+        }
 
         void TCPBaseSocket::setFlags(unsigned int flags)
         {
             this->flags = flags;
-            if(!isConnected())
+            if (!isConnected())
             {
                 return;
             }
             int val;
             val = int(flags & SOCKET_FLAG_REUSEADDR);
             setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR,
-                       (const char*)&val, sizeof(val));
+                       (const char *)&val, sizeof(val));
             val = int(flags & SOCKET_FLAG_BROADCAST);
             setsockopt(sock_fd, SOL_SOCKET, SO_BROADCAST,
-                       (const char*)&val, sizeof(val));
+                       (const char *)&val, sizeof(val));
             val = int(flags & SOCKET_FLAG_KEEPALIVE);
             setsockopt(sock_fd, SOL_SOCKET, SO_KEEPALIVE,
-                       (const char*)&val, sizeof(val));
+                       (const char *)&val, sizeof(val));
             val = int(flags & SOCKET_FLAG_NODELAY);
             setsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY,
-                       (const char*)&val, sizeof(val));
+                       (const char *)&val, sizeof(val));
             setsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY,
-                       (const char*)&val, sizeof(val));
+                       (const char *)&val, sizeof(val));
 #ifdef __APPLE__
             // prevent send() from raising SIGPIPE
             int set = 1;
@@ -525,21 +573,27 @@ namespace mars
         }
 
         bool TCPBaseSocket::isConnected() const
-        { return sock_fd != INVALID_SOCKET; }
+        {
+            return sock_fd != INVALID_SOCKET;
+        }
 
         double TCPBaseSocket::getTimeout() const
-        { return sock_timeout; }
+        {
+            return sock_timeout;
+        }
 
         void TCPBaseSocket::setTimeout(double timeout)
-        { sock_timeout = timeout; }
+        {
+            sock_timeout = timeout;
+        }
 
         int TCPBaseSocket::internal_select(bool writing, double timeout)
         {
-            if(sock_timeout <= 0.)
+            if (sock_timeout <= 0.)
                 return 1;
-            if(!isConnected())
+            if (!isConnected())
                 return 0;
-            if(timeout < 0.)
+            if (timeout < 0.)
                 return 1;
             struct timeval timeoutStruct;
             timeoutStruct.tv_sec = (int)timeout;
@@ -548,13 +602,13 @@ namespace mars
             FD_ZERO(&fds);
             FD_SET(sock_fd, &fds);
             int n;
-            if(writing)
-                n = select((int)(sock_fd+1), NULL, &fds, NULL, &timeoutStruct);
+            if (writing)
+                n = select((int)(sock_fd + 1), NULL, &fds, NULL, &timeoutStruct);
             else
-                n = select((int)(sock_fd+1), &fds, NULL, NULL, &timeoutStruct);
-            if(n < 0)
+                n = select((int)(sock_fd + 1), &fds, NULL, NULL, &timeoutStruct);
+            if (n < 0)
                 return -1;
-            if(n == 0)
+            if (n == 0)
                 return 1;
             return 0;
         }

@@ -1,5 +1,5 @@
-#include "MutexLocker.h"
-#include "Mutex.h"
+#include "MutexLocker.hpp"
+#include "Mutex.hpp"
 
 
 namespace mars

@@ -1,12 +1,13 @@
 
-#include "mathUtils.h"
-#include "misc.h"
+#include "mathUtils.hpp"
+#include "misc.hpp"
 
 #include <stdexcept>
 #include <cmath>
 #include <algorithm>
 #include <Eigen/Core>
-//#include <stdio.h>
+
+using namespace configmaps;
 
 namespace mars
 {
@@ -365,12 +366,6 @@ namespace mars
 
         double random_normal_number(double mean, double std, double low, double high)
         {
-            // C++11 - does not work on all compilers, yet
-            // std::default_random_engine generator;
-            // std::normal_real_distribution<double> normal_dis(mean, std);
-            //return normal_dis(generator);
-
-            // return a normally distributed random number, restricted to range [min, max]
             double u1=random_number(0, 1, 3);
             double u2=random_number(0, 1, 3);
             double num = cos(2*M_PI*u2)*sqrt(-2.*log(u1)) * std + mean;

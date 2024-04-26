@@ -1,4 +1,4 @@
-#include "Color.h"
+#include "Color.hpp"
 
 using namespace configmaps;
 
@@ -23,8 +23,7 @@ namespace mars
             (*item)["g"] = g;
             (*item)["b"] = b;
         }
-    
+
     } // end of namespace base
 
 } // end of namespace mars
-

@@ -1,5 +1,5 @@
-#include "WaitCondition.h"
-#include "Mutex.h"
+#include "WaitCondition.hpp"
+#include "Mutex.hpp"
 
 #include <pthread.h>
 #include <errno.h>

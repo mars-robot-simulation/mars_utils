@@ -1,6 +1,6 @@
 
 #include <Eigen/Core>
-#include "Vector.h"
+#include "Vector.hpp"
 #include "Geometry.hpp"
 #include <cmath>
 
@@ -15,27 +15,27 @@ namespace mars
         double getFactorFromColinear(Vector vector1, Vector vector2)
         {
             assert(relation(vector1, vector2) == IDENTICAL_OR_MULTIPLE);
-            return vector1.norm()/vector2.norm();
+            return vector1.norm() / vector2.norm();
         }
 
         double degToRad(double angle)
         {
-            return M_PI * angle/180.0;
+            return M_PI * angle / 180.0;
         }
 
         double radToDeg(double angle)
         {
-            return 180 * angle/M_PI;
+            return 180 * angle / M_PI;
         }
 
         double cleanAngle(double angle)
         {
-            return degToRad((fmod(((radToDeg(angle))+180.0), 360.0)-180.0));
+            return degToRad((fmod(((radToDeg(angle)) + 180.0), 360.0) - 180.0));
         }
 
         bool isnan(Quaternion q)
         {
-            bool out=false;
+            bool out = false;
             out |= std::isnan(q.w());
             out |= std::isnan(q.x());
             out |= std::isnan(q.y());
@@ -45,15 +45,14 @@ namespace mars
 
         bool isnan(Vector v)
         {
-            bool out=false;
+            bool out = false;
             out |= std::isnan(v.x());
             out |= std::isnan(v.y());
             out |= std::isnan(v.z());
             return out;
         }
 
-
-        Line::Line(Vector point, Vector vector_type, Method method/*=POINT_VECTOR*/, bool segment_from_vector_length) : point(point)
+        Line::Line(Vector point, Vector vector_type, Method method /*=POINT_VECTOR*/, bool segment_from_vector_length) : point(point)
         {
             assert(method == POINT_VECTOR || method == POINT_POINT);
             switch (method)
@@ -62,7 +61,7 @@ namespace mars
                 direction = vector_type;
                 break;
             case POINT_POINT:
-                assert (relation(point, vector_type) != IDENTICAL_OR_MULTIPLE);
+                assert(relation(point, vector_type) != IDENTICAL_OR_MULTIPLE);
                 direction = (vector_type - point);
                 break;
             }
@@ -75,7 +74,7 @@ namespace mars
             initialized = true;
         }
 
-        Line::Line() : point(Vector(NAN, NAN, NAN)), direction(Vector(0,0,0)), initialized(false)
+        Line::Line() : point(Vector(NAN, NAN, NAN)), direction(Vector(0, 0, 0)), initialized(false)
         {
         }
 
@@ -88,7 +87,7 @@ namespace mars
         double Line::getFactorForPoint(Vector point)
         {
             assert(isInitialized());
-            assert(relation(*this, point, /*check segment*/false) == CONTAINING);
+            assert(relation(*this, point, /*check segment*/ false) == CONTAINING);
             return getFactorFromColinear((point - this->point), this->direction);
         }
 
@@ -100,30 +99,29 @@ namespace mars
             return out;
         }
 
-
-        Plane::Plane(Vector point, Vector vector_type1, Vector vector_type2, Method method/*=THREE_POINTS*/) : point(point)
+        Plane::Plane(Vector point, Vector vector_type1, Vector vector_type2, Method method /*=THREE_POINTS*/) : point(point)
         {
             assert(method == POINT_TWO_VECTORS || method == THREE_POINTS);
             switch (method)
             {
             case POINT_TWO_VECTORS:
-                assert(relation(vector_type1,vector_type2) != IDENTICAL_OR_MULTIPLE);
+                assert(relation(vector_type1, vector_type2) != IDENTICAL_OR_MULTIPLE);
                 normal = vector_type1.cross(vector_type2).normalized();
                 break;
             case THREE_POINTS:
-                assert(relation((vector_type1-point),(vector_type2-point)) != IDENTICAL_OR_MULTIPLE);
-                normal = (vector_type1-point).cross(vector_type2-point).normalized();
+                assert(relation((vector_type1 - point), (vector_type2 - point)) != IDENTICAL_OR_MULTIPLE);
+                normal = (vector_type1 - point).cross(vector_type2 - point).normalized();
                 break;
             }
             initialized = true;
         }
 
-        Plane::Plane(Vector point, Vector normal) :  point(point), normal(normal), initialized(true)
+        Plane::Plane(Vector point, Vector normal) : point(point), normal(normal), initialized(true)
         {
             this->normal.normalize();
         }
 
-        Plane::Plane(void) : point(Vector(NAN, NAN, NAN)), normal(Vector(0,0,0)), initialized(false)
+        Plane::Plane(void) : point(Vector(NAN, NAN, NAN)), normal(Vector(0, 0, 0)), initialized(false)
         {
         }
 
@@ -151,7 +149,6 @@ namespace mars
             return out;
         }
 
-
         Relation relation(Vector vector1, Vector vector2)
         {
             assert(!(std::isnan(vector1.norm()) && std::isnan(vector2.norm())));
@@ -164,7 +161,8 @@ namespace mars
             if (fabs(c.x()) <= EPSILON && fabs(c.y()) <= EPSILON && fabs(c.z()) <= EPSILON)
             {
                 return IDENTICAL_OR_MULTIPLE;
-            } else if (fabs(s) <= EPSILON)
+            }
+            else if (fabs(s) <= EPSILON)
             {
                 return ORTHOGONAL;
             }
@@ -173,7 +171,7 @@ namespace mars
 
         Relation relation(Plane plane1, Plane plane2)
         {
-            if (relation(plane1.normal,plane2.normal) == IDENTICAL_OR_MULTIPLE)
+            if (relation(plane1.normal, plane2.normal) == IDENTICAL_OR_MULTIPLE)
             {
                 if (relation(plane1, plane2.point) == CONTAINING)
                 {
@@ -184,9 +182,9 @@ namespace mars
             return INTERSECT;
         }
 
-        Relation relation(Plane plane, Line line, bool check_segment/*=false*/)
+        Relation relation(Plane plane, Line line, bool check_segment /*=false*/)
         {
-            if (relation(plane.normal,line.direction) == ORTHOGONAL)
+            if (relation(plane.normal, line.direction) == ORTHOGONAL)
             {
                 if (relation(plane, line.point) == CONTAINING)
                 {
@@ -196,7 +194,7 @@ namespace mars
             }
             if (check_segment)
             {
-                if (relation(line,intersect(plane, line)) != CONTAINING)
+                if (relation(line, intersect(plane, line)) != CONTAINING)
                 {
                     return SKEW;
                 }
@@ -206,7 +204,7 @@ namespace mars
 
         Relation relation(Plane plane, Vector point)
         {
-            if (relation(plane.normal, plane.point-point) == ORTHOGONAL)
+            if (relation(plane.normal, plane.point - point) == ORTHOGONAL)
             {
                 return CONTAINING;
             }
@@ -231,21 +229,22 @@ namespace mars
             return SKEW;
         }
 
-        Relation relation(Line line, Vector point, bool check_segment/*=false*/)
+        Relation relation(Line line, Vector point, bool check_segment /*=false*/)
         {
             if (relation(line.direction, (point - line.point)) == IDENTICAL_OR_MULTIPLE)
             {
                 if (check_segment)
                 {
                     double r = line.getFactorForPoint(point);
-                    if (r<line.r_min) return SKEW;
-                    if (r>line.r_max) return SKEW;
+                    if (r < line.r_min)
+                        return SKEW;
+                    if (r > line.r_max)
+                        return SKEW;
                 }
                 return CONTAINING;
             }
             return SKEW;
         }
-
 
         Vector intersect(Line line1, Line line2)
         {
@@ -256,13 +255,14 @@ namespace mars
                 Plane pln1(line1.point, line1.direction, perpendicular, Plane::POINT_TWO_VECTORS);
                 Vector p2 = intersect(pln1, line2);
 #if DEBUG_CHECKS
-                //check
+                // check
                 Plane pln2(line2.point, line2.direction, perpendicular, Plane::POINT_TWO_VECTORS);
                 Vector p1 = intersect(pln2, line1);
-                if(relation(p1, p2) != IDENTICAL_OR_MULTIPLE) {
+                if (relation(p1, p2) != IDENTICAL_OR_MULTIPLE)
+                {
                     fprintf(stderr, "Assertion failed! p1(%f, %f, %f) != p2(%f, %f, %f)\n",
                             p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z());
-                    //assert(false);
+                    // assert(false);
                 }
 #endif
                 return p2;
@@ -274,11 +274,11 @@ namespace mars
 
         Vector intersect(Plane plane, Line line)
         {
-            if (relation(plane, line, /*check_segment*/false) == INTERSECT)
+            if (relation(plane, line, /*check_segment*/ false) == INTERSECT)
             {
-                //using the hesse normal form, setting line in plane
+                // using the hesse normal form, setting line in plane
                 double r = (plane.normal.dot(plane.point - line.point)) /
-                    (plane.normal.dot(line.direction));
+                           (plane.normal.dot(line.direction));
                 return line.getPointOnLine(r);
             }
             fprintf(stderr, "Assertion failed! Relation is not INTERSECT: %d\n", relation(plane, line));
@@ -288,37 +288,36 @@ namespace mars
 
         Line intersect(Plane plane1, Plane plane2)
         {
-            if (relation(plane1,plane2) == INTERSECT)
+            if (relation(plane1, plane2) == INTERSECT)
             {
-                //direction of intersection
+                // direction of intersection
                 Vector direction = plane1.normal.cross(plane2.normal);
-                //create a line that is ORTHOGONAL to the intersection and plane1.normal and lies in plane1
+                // create a line that is ORTHOGONAL to the intersection and plane1.normal and lies in plane1
                 Line dummy(plane1.point, direction.cross(plane1.normal));
-                //the intersection point of this line and plane2 is a point on the intersection line of both planes
+                // the intersection point of this line and plane2 is a point on the intersection line of both planes
                 Vector point = intersect(plane2, dummy);
                 return Line(point, direction);
             }
-            fprintf(stderr, "Assertion failed! Relation is not INTERSECT: %d\n", relation(plane1,plane2));
+            fprintf(stderr, "Assertion failed! Relation is not INTERSECT: %d\n", relation(plane1, plane2));
             assert(false);
             return Line();
         }
 
-
-        double distance(Plane plane, Vector point, bool absolute/*=true*/)
+        double distance(Plane plane, Vector point, bool absolute /*=true*/)
         {
             Line perpendicular(point, plane.normal, Line::POINT_VECTOR);
             Vector projected = intersect(plane, perpendicular);
             Vector distance = (point - projected);
             assert(relation(distance, plane.normal) == IDENTICAL_OR_MULTIPLE);
-            int sign=1;
+            int sign = 1;
             if (!absolute && distance.dot(plane.normal) < 0)
             {
-                sign=-1;
+                sign = -1;
             }
-            return sign*distance.norm();
+            return sign * distance.norm();
         }
 
-        double distance(Line line1, Line line2, bool check_segment/*=false*/)
+        double distance(Line line1, Line line2, bool check_segment /*=false*/)
         {
             Relation rel = relation(line1, line2);
             switch (rel)
@@ -329,15 +328,18 @@ namespace mars
             case PARALLEL:
                 return distance(line1, line2.point, check_segment);
                 break;
-            default: //INTERSECT or SKEW
+            default: // INTERSECT or SKEW
                 double r1, r2;
                 Vector intersection;
-                if (rel == INTERSECT) {
-                    //we need to do this to check if the intersection is in the  line segment
+                if (rel == INTERSECT)
+                {
+                    // we need to do this to check if the intersection is in the  line segment
                     intersection = intersect(line1, line2);
                     r1 = line1.getFactorForPoint(intersection);
                     r2 = line2.getFactorForPoint(intersection);
-                } else {
+                }
+                else
+                {
                     /*
                     //make a plane which is parallel to line2 containing line1
                     Plane pln(line1.point, line1.direction, line2.direction, Plane::POINT_TWO_VECTORS);
@@ -360,23 +362,23 @@ namespace mars
                     r1 = line1.getFactorForPoint(intersection);
                     */
 
-                    //from condition that shortest connection is orthogonal to both lines. scalar product zero
-                    double dp1  = line1.direction.dot(line1.point);
-                    double dd1  = line1.direction.dot(line1.direction);
+                    // from condition that shortest connection is orthogonal to both lines. scalar product zero
+                    double dp1 = line1.direction.dot(line1.point);
+                    double dd1 = line1.direction.dot(line1.direction);
                     double d1p2 = line1.direction.dot(line2.point);
                     double dd12 = line1.direction.dot(line2.direction);
                     double d2p1 = line2.direction.dot(line1.point);
-                    double dp2  = line2.direction.dot(line2.point);
-                    double dd2  = line2.direction.dot(line2.direction);
-                    r2 = (d2p1+(dd12*(d1p2-dp1)/dd1)-dp2) / (dd2-dd12*dd12/dd1);
-                    r1 = (d1p2-dp1+r2*dd12)/dd1;
+                    double dp2 = line2.direction.dot(line2.point);
+                    double dd2 = line2.direction.dot(line2.direction);
+                    r2 = (d2p1 + (dd12 * (d1p2 - dp1) / dd1) - dp2) / (dd2 - dd12 * dd12 / dd1);
+                    r1 = (d1p2 - dp1 + r2 * dd12) / dd1;
                 }
                 if (check_segment)
                 {
                     r1 = fmin(line1.r_max, fmax(r1, line1.r_min));
                     r2 = fmin(line2.r_max, fmax(r2, line2.r_min));
                 }
-                //distance between the points closest to the intersection
+                // distance between the points closest to the intersection
                 return distance(line1.getPointOnLine(r1), line2.getPointOnLine(r2));
                 break;
             }
@@ -384,7 +386,7 @@ namespace mars
             return -1;
         }
 
-        double distance(Line line, Vector point, bool check_segment/*=false*/)
+        double distance(Line line, Vector point, bool check_segment /*=false*/)
         {
             Relation rel = relation(line, point);
             switch (rel)
@@ -392,7 +394,7 @@ namespace mars
             case CONTAINING:
                 return 0.0;
                 break;
-            default: //SKEW
+            default: // SKEW
                 Plane pln(point, line.direction);
                 Vector point2 = intersect(pln, line);
                 if (check_segment)
@@ -407,9 +409,8 @@ namespace mars
 
         double distance(Vector point1, Vector point2)
         {
-            return (point2-point1).norm();
+            return (point2 - point1).norm();
         }
 
     } // end of namespace utils
 } // end of namespace mars
-

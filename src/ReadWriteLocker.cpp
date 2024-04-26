@@ -1,6 +1,6 @@
 
-#include "ReadWriteLocker.h"
-#include "ReadWriteLock.h"
+#include "ReadWriteLocker.hpp"
+#include "ReadWriteLock.hpp"
 
 
 namespace mars

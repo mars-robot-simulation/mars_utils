@@ -1,6 +1,6 @@
-#include "Thread.h"
+#include "Thread.hpp"
 
-#include "misc.h"
+#include "misc.hpp"
 
 #include <pthread.h>
 

@@ -3,7 +3,7 @@
 #include <cstddef> // for std::size_t
 #include <list>
 
-#include "Mutex.h"
+#include "Mutex.hpp"
 
 namespace mars
 {
