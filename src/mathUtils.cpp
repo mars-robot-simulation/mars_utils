@@ -6,7 +6,8 @@
 #include <cmath>
 #include <algorithm>
 #include <Eigen/Core>
-//#include <stdio.h>
+
+using namespace configmaps;
 
 namespace mars
 {

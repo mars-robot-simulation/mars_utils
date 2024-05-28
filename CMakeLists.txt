@@ -1,25 +1,27 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
+project(mars_utils VERSION 1.0.0 DESCRIPTION "This Library contains several useful utilities like a Mutex and Thread class.")
+include(${CMAKE_SOURCE_DIR}/cmake/mars_utils-dependencies.cmake)
 
-project(mars_utils)
-set(PROJECT_VERSION 1.0)
-set(PROJECT_DESCRIPTION "This Library contains several useful utilities like a Mutex and Thread class.")
-
-include(FindPkgConfig)
-
-find_package(lib_manager)
-
-lib_defaults()
-define_module_info()
-
-pkg_check_modules(PKGCONFIG REQUIRED
-        eigen3
-        configmaps
+# Export the library interface
+install(EXPORT mars_utils-targets
+	NAMESPACE mars_utils::
+	DESTINATION lib/cmake/mars_utils
 )
-include_directories(${PKGCONFIG_INCLUDE_DIRS})
-link_directories(${PKGCONFIG_LIBRARY_DIRS})
-add_definitions(${PKGCONFIG_CFLAGS_OTHER})  #flags excluding the ones with -I
+# Create and install the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("mars_utils-config-version.cmake"
+	VERSION ${mars_utils_VERSION}
+	COMPATIBILITY SameMajorVersion)
 
-set(SOURCES
+  install(
+    FILES
+    cmake/mars_utils-config.cmake
+    cmake/mars_utils-dependencies.cmake
+    ${PROJECT_BINARY_DIR}/mars_utils-config-version.cmake
+    DESTINATION
+      lib/cmake/mars_utils
+  )  
+set(SOURCES 
     src/Color.cpp
     src/Mutex.cpp
     src/MutexLocker.cpp
@@ -48,13 +50,21 @@ set(HEADERS
 #    src/Socket.h
 )
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
-target_link_libraries(
-        ${PROJECT_NAME}
-        ${PKGCONFIG_LIBRARIES}
-        -lpthread
+add_library(mars_utils SHARED ${SOURCES})
+target_compile_features(mars_utils PUBLIC cxx_std_17)
+target_link_libraries(mars_utils PUBLIC
+  pthread
+	Eigen3::Eigen
+  configmaps::configmaps
 )
+
+target_include_directories(mars_utils
+	PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+		$<INSTALL_INTERFACE:include>
+)
+
 
 if(WIN32)
   set(LIB_INSTALL_DIR bin) # .dll are in PATH, like executables
@@ -62,25 +72,24 @@ else(WIN32)
   set(LIB_INSTALL_DIR lib)
 endif(WIN32)
 
+# Install the binaries
+install(TARGETS mars_utils EXPORT mars_utils-targets
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+  ARCHIVE DESTINATION lib
+)
 
-set(_INSTALL_DESTINATIONS
-	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-	ARCHIVE DESTINATION lib
+# Install headers into mars include directory
+install(FILES ${HEADERS} DESTINATION include/mars_utils)
+
+# Prepare and install necessary files to support finding of the library 
+install(
+	FILES cmake/mars_utils-config.cmake
+	DESTINATION lib/cmake/mars_utils
 )
 
 
-# Install the library into the lib folder
-install(TARGETS ${PROJECT_NAME} ${_INSTALL_DESTINATIONS})
-
-# Install headers into mars include directory
-install(FILES ${HEADERS} DESTINATION include/${PROJECT_NAME})
-
-# Prepare and install necessary files to support finding of the library
 # using pkg-config
-configure_file(${PROJECT_NAME}.pc.in ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION lib/pkgconfig)
-
-
-
+configure_file(mars_utils.pc.in ${CMAKE_BINARY_DIR}/mars_utils.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/mars_utils.pc DESTINATION lib/pkgconfig)
 
