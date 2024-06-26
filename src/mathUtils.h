@@ -4,8 +4,6 @@
 #include "Quaternion.h"
 #include <configmaps/ConfigData.h>
 
-using namespace configmaps;
-
 namespace mars
 {
     namespace utils
@@ -57,6 +55,7 @@ namespace mars
 
         inline Vector scaleVectorToLength(const Vector &vec, const double &length)
         { return vec * length / vec.norm(); }
+        
 
         /**
          * Angle between two vectors
@@ -100,13 +99,13 @@ namespace mars
 
         Vector vectorFromSpherical(double r, double theta, double phi);
 
-        bool vectorFromConfigItem(ConfigItem *item, Vector *v);
-        void vectorToConfigItem(ConfigItem *item, const Vector *v);
-        ConfigItem vectorToConfigItem(const Vector& v);
+        bool vectorFromConfigItem(configmaps::ConfigItem *item, Vector *v);
+        void vectorToConfigItem(configmaps::ConfigItem *item, const Vector *v);
+        configmaps::ConfigItem vectorToConfigItem(const Vector &v);
 
-        bool quaternionFromConfigItem(ConfigItem *item, Quaternion *q);
-        void quaternionToConfigItem(ConfigItem *item, const Quaternion *q, bool add_euler_angles = false);
-        ConfigItem quaternionToConfigItem(const Quaternion& q, bool add_euler_angles = false);
+        bool quaternionFromConfigItem(configmaps::ConfigItem *item, Quaternion *q);
+        void quaternionToConfigItem(configmaps::ConfigItem *item, const Quaternion *q, bool add_euler_angles = false);
+        configmaps::ConfigItem quaternionToConfigItem(const Quaternion &q, bool add_euler_angles = false);
 
         template <typename T>
         Quaternion quaternionFromMembers(T q)
