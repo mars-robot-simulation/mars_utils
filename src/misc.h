@@ -58,7 +58,20 @@ namespace mars
 #else
             struct timeval timer;
             gettimeofday(&timer, NULL);
-            return ((long long)(timer.tv_sec))*1000LL + ((long)(timer.tv_usec))/1000;
+            return ((long long)(timer.tv_sec))*1000LL + ((long)(timer.tv_usec)/1000);
+#endif
+        }
+
+        inline long long getTimeU()
+        {
+#ifdef WIN32
+            struct timeb timer;
+            ftime(&timer);
+            return (long long)(timer.time*1000000LL + timer.millitm*1000LL);
+#else
+            struct timeval timer;
+            gettimeofday(&timer, NULL);
+            return ((long long)(timer.tv_sec))*1000000LL + ((long)(timer.tv_usec));
 #endif
         }
 
@@ -70,6 +83,11 @@ namespace mars
         inline long long getTimeDiff(long long start)
         {
             return getTime() - start;
+        }
+
+        inline long long getTimeDiffU(long long start)
+        {
+            return getTimeU() - start;
         }
 
         /**
