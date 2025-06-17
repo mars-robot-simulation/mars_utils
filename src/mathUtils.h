@@ -67,8 +67,16 @@ namespace mars
 
         double getYaw(const mars::utils::Quaternion &);
 
-        inline Quaternion angleAxisToQuaternion(double angle, const Vector &axis) {
+        inline Quaternion angleAxisToQuaternion(double angle, const Vector &axis)
+        {
             return Quaternion(Eigen::AngleAxis<double>(angle, axis));
+        }
+
+        inline void quaternionToAngleAxis(const mars::utils::Quaternion &q, double *angle, Vector *axis)
+        {
+            Eigen::AngleAxis<double> aa(q);
+            *angle = aa.angle();
+            *axis = aa.axis();
         }
 
         Quaternion eulerToQuaternion(const Vector &euler_v);
