@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "Geometry.hpp"
 #include <cmath>
+#include <cassert>
 
 #ifndef DEBUG_CHECKS
 #define DEBUG_CHECKS 0
